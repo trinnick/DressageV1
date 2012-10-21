@@ -16,13 +16,14 @@ public class TestMovement : MonoBehaviour {
 		if (www.error == null){
 			//Successfully loaded the XML
 			Debug.Log("Loaded following XML file: \n" + www.text);
-			
 			//Create new XML document from loaded data
 			XmlDocument xmlDoc = new XmlDocument();
 			xmlDoc.LoadXml(www.text);
-			
+						
 			//Point to the Movement nodes and process them
-			ProcessMovement(xmlDoc.SelectNodes("Test/Name/Movement"));
+			ProcessMovement(xmlDoc.SelectNodes("Test/Movement"));
+
+			
 		}
 		else{
 			Debug.Log("Error: " + www.error);
@@ -35,12 +36,12 @@ public class TestMovement : MonoBehaviour {
 		
 		foreach (XmlNode node in nodes){
 			movement = new Movement();
-			movement.MovementID = node.SelectSingleNode("MovementID").InnerText;
+			movement.MovementID = node.SelectSingleNode("MovementId").InnerText;
 			movement.MovementDesc = node.SelectSingleNode("MovementDesc").InnerText;
-			
+
 			//Assign MovementDetails
 			foreach (XmlNode detail in node.SelectNodes("MovementDetail")){
-				movement.Sequence = detail.SelectSingleNode("Sequence").InnerText;
+				movement.Sequence = detail.SelectSingleNode("SequenceId").InnerText;
 				movement.Path = detail.SelectSingleNode("Path").InnerText;
 				movement.PathDesc = detail.SelectSingleNode("PathDesc").InnerText;
 				movement.Gait = detail.SelectSingleNode("Gait").InnerText;
