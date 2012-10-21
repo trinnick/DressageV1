@@ -1,8 +1,9 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Editor\NewBehaviourScript.js">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Movement\TestMovement.cs">
     <Files>
-      <File FileName="Assets\Editor\NewBehaviourScript.js" Line="63" Column="2" />
+      <File FileName="Assets\Movement\TestMovement.cs" Line="18" Column="44" />
+      <File FileName="Assets\Movement\Movement.cs" Line="11" Column="21" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
