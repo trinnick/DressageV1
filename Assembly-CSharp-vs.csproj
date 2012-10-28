@@ -44,8 +44,9 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Movement\HorseMovement.cs" />
      <Compile Include="Assets\Movement\Movement.cs" />
-     <Compile Include="Assets\Movement\TestMovement.cs" />
+     <Compile Include="Assets\TestMovement.cs" />
      <None Include="Assets\Movement\XMLMovementDirections\SecondLevelTest2.xml" />
      <None Include="Assets\Movement\XMLMovementDirections\FirstLevelTest1.xml" />
      <None Include="Assets\Movement\XMLMovementDirections\ThirdLevelTest2.xml" />
