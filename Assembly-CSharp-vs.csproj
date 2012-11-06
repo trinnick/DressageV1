@@ -46,12 +46,12 @@
   <ItemGroup>
      <Compile Include="Assets\Movement\HorseMovement.cs" />
      <Compile Include="Assets\Movement\Movement.cs" />
-     <Compile Include="Assets\TestMovement.cs" />
      <None Include="Assets\Movement\XMLMovementDirections\SecondLevelTest2.xml" />
      <None Include="Assets\Movement\XMLMovementDirections\FirstLevelTest1.xml" />
      <None Include="Assets\Movement\XMLMovementDirections\ThirdLevelTest2.xml" />
      <None Include="Assets\Movement\XMLMovementDirections\ThirdLevelTest1.xml" />
      <None Include="Assets\Movement\XMLMovementDirections\SecondLevelTest3.xml" />
+     <None Include="Assets\Standard Assets\Skyboxes\_skybox info.txt" />
      <None Include="Assets\Movement\XMLMovementDirections\ThirdLevelTest3.xml" />
      <None Include="Assets\Movement\XMLMovementDirections\FirstLevelTest2.xml" />
      <None Include="Assets\Movement\XMLMovementDirections\FourthLevelTest3.xml" />

@@ -6,7 +6,11 @@ using System.Collections;
 public class HorseMovement : MonoBehaviour {
 	
 	public Vector3 defualt = new Vector3();
-	public float rateOfMovement = 0.3f;
+	public float rateOfMovement = .3f;
+	public String movementID = "N/A";
+	public String[] movementDesc;
+	public String pathDesc = "N/A";
+	bool pause = false;
 	
 	// Use this for initialization
 	IEnumerator Start () {
@@ -47,13 +51,18 @@ public class HorseMovement : MonoBehaviour {
 			//Extract and assign tagged items within the xmlDoc to object variables within Movement class
 			movement.MovementID = node.SelectSingleNode("MovementId").InnerText;
 			movement.MovementDesc = node.SelectSingleNode("MovementDesc").InnerText;
-
+			
+			movementID = movement.MovementID;
+			movementDesc = movement.MovementDesc.Split('.');
+			
 			//Assign MovementDetails to Movement Class variables
 			foreach (XmlNode detail in node.SelectNodes("MovementDetail")){
 				movement.Sequence = detail.SelectSingleNode("SequenceId").InnerText;
 				movement.Path = detail.SelectSingleNode("Path").InnerText;
 				movement.PathDesc = detail.SelectSingleNode("PathDesc").InnerText;
 				movement.Gait = detail.SelectSingleNode("Gait").InnerText;
+				
+				pathDesc = movement.PathDesc;
 			
 				//Call LoadMovement method and pass movement object
 				yield return StartCoroutine(LoadMovement(movement));
@@ -73,7 +82,7 @@ public class HorseMovement : MonoBehaviour {
 		
 		//Split the string of path and place in array elements based on seperator character -
 		string[] path = movement.Path.Split('-');
-		
+				
 		//Assign the firstPosition based on the first element of the array path
 		firstPosition = GameObject.Find(path[0]).transform.position;
 		
@@ -89,71 +98,123 @@ public class HorseMovement : MonoBehaviour {
 		if(path.Length >= 4){
 			fourthPosition = GameObject.Find(path[3]).transform.position;
 		}
-		
-		//Show movement based on path extraction in debugger
-		Debug.Log("Movement: " + movement.Path);
-		
-		switch(path.Length){
-		case 2:
-			Debug.Log(path[0] + ": " + firstPosition + "\n" + path[1] + ": " + secondPosition);
-			break;
-		case 3:
-			Debug.Log(path[0] + ": " + firstPosition + "\n" + path[1] + ": " + secondPosition + "\n" + path[2] + ": " + thirdPosition);
-			break;
-		case 4:
-			Debug.Log(path[0] + ": " + firstPosition + "\n" + path[1] + ": " + secondPosition + "\n" + path[2] + ": " + thirdPosition + "\n" + path[3] + ": " + fourthPosition);
-			break;
-		default:
-			Debug.Log("Problem Processing path array");
-			break;
+	
+		if(movement.PathDesc == "Line" || movement.PathDesc =="Diagonal"){
+			
+			//Show movement based on path extraction in debugger
+			Debug.Log("Movement: " + movement.Path);
+			
+			switch(path.Length){
+			case 2:
+				Debug.Log(path[0] + ": " + firstPosition + "\n" + path[1] + ": " + secondPosition);
+				break;
+			case 3:
+				Debug.Log(path[0] + ": " + firstPosition + "\n" + path[1] + ": " + secondPosition + "\n" + path[2] + ": " + thirdPosition);
+				break;
+			case 4:
+				Debug.Log(path[0] + ": " + firstPosition + "\n" + path[1] + ": " + secondPosition + "\n" + path[2] + ": " + thirdPosition + "\n" + path[3] + ": " + fourthPosition);
+				break;
+			default:
+				Debug.Log("Problem Processing path array");
+				break;
+			}
+			
+			//Call movement based on Coroutine and yield commands
+	
+			if(path.Length>=2){
+				yield return StartCoroutine(move(firstPosition,secondPosition));
+			}
+			
+			if(path.Length >= 3){
+				yield return StartCoroutine(move(secondPosition,thirdPosition));
+			}
+			
+			if(path.Length >= 4){
+				yield return StartCoroutine(move(thirdPosition,fourthPosition));
+			}
 		}
-		
-		//Call movement based on Coroutine and yield commands
+		else{
+			string[] desc = movement.PathDesc.Split('_');
+			
+			float radius = 0.0f;
+			
+			if(desc[0] == "HalfCircle"){
+				radius = float.Parse(desc[2])/10.0f;
+				//Debug.Log("Radius: " + radius);
+				
+				if(desc[3] == "Down"){
+					yield return StartCoroutine(halfCircleMovement(firstPosition,secondPosition,radius));
+				}
+				
+				if(desc[3] == "Up"){
+					yield return StartCoroutine(halfCircleMovement(firstPosition,secondPosition,-radius));
+				}
+			}
+		}
+				
+	}
 
-		yield return StartCoroutine(firstMovement(firstPosition,secondPosition));
-		
-		if(path.Length >= 3){
-			yield return StartCoroutine(secondMovement(secondPosition,thirdPosition));
+	void OnGUI(){
+		String movementDescFormatted = null;
+		for(int i=0;i<movementDesc.Length;i++){
+			movementDescFormatted += "\n" + movementDesc[i];
 		}
-		
-		if(path.Length >= 4){
-			yield return StartCoroutine(thirdMovement(thirdPosition,fourthPosition));
-		}
+		GUI.Box (new Rect (0,0,200,100), "Movement Description:\n" + movementDescFormatted);
 	}
 	
-	IEnumerator firstMovement(Vector3 first, Vector3 second){
-	    float i = 0.0f;
-		
-	    while (i < 1.0f) {
-	        i += Time.deltaTime * rateOfMovement;
+	IEnumerator move(Vector3 first, Vector3 second){
+	    float dist = Vector3.Distance(first, second);
+	
+	    for (float i = 0.0f; i < 1.0f; i += (rateOfMovement * Time.deltaTime)) {
 	        transform.position = Vector3.Lerp(first, second, i);
 			yield return null;
+			//Debug.Log("Loop Count: " + i);
+			//Debug.Log("DeltaTime: " + Time.deltaTime);
+			
+			pauseMovement();
 	    }
 			
 		Debug.Log("Ending Position: " + transform.position);
 	}
 	
-	IEnumerator secondMovement(Vector3 second, Vector3 third){
-	    float i = 0.0f;
+	IEnumerator halfCircleMovement(Vector3 first, Vector3 second, float radius){
+		Vector3 center = new Vector3();
+		Vector3 change = new Vector3(radius,0.0f,0.0f);
+	    float dist = Vector3.Distance(first, second);
+	
+	    for (float i = 0.0f; i < 1.0f; i += (rateOfMovement * Time.deltaTime)) {
+		    // The center of the arc
+		    center = (first + second)/2;
+		    // move the center a bit downwards to make the arc vertical
+		    center -= change;
 		
-	    while (i < 1.0f) {
-	        i += Time.deltaTime * rateOfMovement;
-	        transform.position = Vector3.Lerp(second, third, i);
+		    // Interpolate over the arc relative to center
+		    Vector3 arcFirst = first - center;
+		    Vector3 arcSecond = second - center;
+		    transform.position = Vector3.Slerp(arcFirst, arcSecond, i);
+		    transform.position += center;
 			yield return null;
+
+			pauseMovement();
 	    }
 			
 		Debug.Log("Ending Position: " + transform.position);
 	}
 	
-	IEnumerator thirdMovement(Vector3 third, Vector3 fourth){
-	    float i = 0.0f;
-		
-	    while (i < 1.0f) {
-	        i += Time.deltaTime * rateOfMovement;
-	        transform.position = Vector3.Lerp(third, fourth, i);
-			yield return null;
-	    }
+	public void pauseMovement(){
+			if(Input.GetKeyDown(KeyCode.Space) && pause == false){
+				pause = true;
+			}
+			else if(Input.GetKeyDown(KeyCode.Space) && pause == true){
+				pause = false;
+			}
 			
-		Debug.Log("Ending Position: " + transform.position);
+			if(pause == true){
+				Time.timeScale = 0;
+			}
+			
+			else if(pause == false){
+				Time.timeScale = 1;
+			}		
 	}
 }
